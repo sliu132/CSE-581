@@ -1,0 +1,66 @@
+Referencing Views
+When it comes to writing SELECT statements, you cannot tell a difference between a table and a user. You have the ability to use all clauses, functions and so on & to the end user, it looks the same.
+
+For example:
+
+SELECT column1 + column2, YEAR(someDate)
+
+       FROM SomeObject
+
+       WHERE column8 = 'blah'
+
+       ORDER BY column19
+
+SomeObject above can be a table or a view. You, as a user, will not know, because the SQL is the same. You could take a look at the object in the object explorer and find out, but you will not be able to tell from the SELECT statement.
+
+
+
+Materialized Views Follow Up Question
+Regular views are precompiled and get cached, so their execution is pretty efficient. The cache is tied to the underlying data however, which means that if the data is changed, the cached data is blown out. So you are running a risk of having to re-pull the data, but on a flip side, the views are always based on up-to-date data. Also, since a view is only a SQL statement, it takes up close to no space.
+
+I have personally never used materialized views. From what I understand, these are useful when your data is more difficult to obtain (takes a long time because of the nature of calculation or where the data is stored). So in order to help with performance, these views contain a copy of the data. This allows for better performance, but also means that these views take up space on the drive and they are not guaranteed to be up-to-date. In Oracle materialized views are updated either on a set schedule or on demand.
+
+Please also be aware that in SQL server materialized views are called "Indexed Views" (link 2). By adding an index onto a view it causes for a copy of the data to be stored. The difference is that the indexed views are updated automatically, which takes care of the stale data issue, but it also means that modifying the underlying data now becomes a more expensive operation, since the view & its index is also modified (link 3).
+
+An article on how to create Indexed Views in Sql Server is in link 4.
+
+http://www.vertabelo.com/blog/technical-articles/a-note-on-materialized-views
+https://msdn.microsoft.com/en-us/library/dd171921%28SQL.100%29.aspx
+https://technet.microsoft.com/en-us/library/cc917715.aspx#XSLTsection124121120120
+https://www.simple-talk.com/sql/learn-sql-server/sql-server-indexed-views-the-basics/
+
+
+Materialized Views Follow Up Question
+Question:
+
+Your statement and Link3 said: "the maintenance of an indexed view may be more expensive than maintaining an index on the table. Conversely, the maintenance of an indexed view with a highly selective condition may be much less expensive than maintaining an index on a table".
+
+I think both statements are opposite of each other in some way(I may be wrong,thats what I understood). Can you state once again whether you would suggest to use these at the expense of more storage cost frequently? 
+
+Answer:
+
+So the two statements are not necessarily in conflict, this is what it boils down to.
+
+Let's say we have an indexed view that combines multiple tables together. That means that the data that the view displays is copied off to the side. So now every time a record is modified/added in any of those underlying tables, that would impact the records in the view (based on it's filtering), the view has to be updated. So the larger the number of tables and/or the larger the number of records that the indexed view stores, the higher the chance of the view having to refresh the data. When the refresh happens, the view has to rerun, and then it's index has to be updated. So an update that triggers this is pretty expensive.
+
+Now let's consider a different scenario. I have a single table indexed view that only covers a very small percentage of that table's data. If we create an index on the table, then every time a change happens to the table itself, the index has to get updated. However, if we have an indexed view instead, then the only time it has to be updated is when the data that would impact the view changes. So if this view is very restrictive, and only selects a small % of the table's records, then updates would be cheaper than managing an index on an entire table.
+
+I know the statements above are a bit convoluded. The issue is, that just like with anything else that deals with performance, the answer is that it depends. It depends on the situation, on the underlying data and on exactly what you are trying to do.
+
+In the first case, you are using a view as views are normally intented - to join together a number of tables in a way that would be useful on a report, or a page. In the second example you are using the indexed view in order to avoid indexing an entire table.
+
+
+
+WITH CHECK OPTION
+If a view has WITH CHECK OPTION in it, what that means is that when you are trying to execute an update against the view, WITH CHECK OPTION would prevent you from updating a row in a way that would make it disapear from the view.
+
+For example if your view had a WHERE that said the values had to be > 100, and you tried to change it to 50 (which would make the row no longer displayed in the view). The CHECK OPTION would prevent such update.
+
+
+
+Helpful links
+http://blog.sqlauthority.com/2010/08/23/sql-server-order-by-does-not-work-limitation-of-the-views-part-1/
+
+http://www.toptal.com/sql/interview-questions
+
+http://www.codeproject.com/Articles/126898/Sql-Server-How-to-write-a-Stored-procedure-in-Sql

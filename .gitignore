@@ -1,0 +1,17 @@
+#ignore .docx
+*.docx
+
+#ignore pdf
+*.pdf
+
+#ignore xlsx
+*.xlsx
+
+#ignore png
+*.png
+
+#ignore vsd
+*.vsd
+
+#ignore txt
+*.txt

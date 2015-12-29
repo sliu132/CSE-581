@@ -1,0 +1,58 @@
+Encrypting Stored Procedures
+Question:
+
+I have seen that prevention of reverse engineering (if created with encryption)is also an advantage of stored procedure.Is it right and if it is can you give an example in understanding what it is stating? Does this mean same as implementing security mechanism as said in the lecture? (based on
+
+http://www.mssqltips.com/sqlservertip/2964/encrypting-and-decrypting-sql-server-stored-procedures-views-and-userdefined-functions/)
+
+Answer:
+
+I suppose you could consider it a security feature. Though prevention of reverse engineering could be done for a number of reasons, but these would be applicable only if you sell or provide your database to an external source. In theory your DBA should be trustworthy enough to work on the DB, and thus should have access to the source code.
+
+You can prevent others from seeing your SQL code, but I'm not sure how much more secure that makes things. The only people allowed to see the code have to have a permission to modify the SP code. So they could easily just change it, if they wanted to hack things. Granted, this may slow them down a bit if they really want to hide things, but I'm not sure that I would consider that a security solution. As a rule of thumb, obfuscation is not a good security practice.
+
+The best usage (my opinion) for the prevention of reverse engineering is if you want to prevent your customer from figuring out the "magic" going on in the stored procedure. Just like when MS sells you the Office suite, you get the application, but not the actual code. This too is a strange solution though, because most of the time you wouldn't be selling a user your database, instead you would sell them your application as a service. Or, if the database is the final product (or a part of), then hiding things is not something you want to do.
+
+Sorry for complicating life. Feel free to read up on obfuscation and why it's not a good security solution/practice, or we can discuss this during the final week, after the security/SQL injection topic.
+
+
+
+Output Parameters vs Return
+A couple of posts that the students posted on this topic/question:
+
+https://social.msdn.microsoft.com/Forums/sqlserver/en-US/97f2f767-453e-477b-8082-2c290fb43499/diff-bw-output-parameter-and-return-in-stored-procedure?forum=transactsql
+
+
+OUTPUT can define multiple parameters to be acquired from a procedure, however RETURN means only one value.
+
+RETURN is supposed to be used as a flag to tell the status of the execution, OUTPUT stores procedure processed data.
+
+In short, return is used to give the control back to the calling program and also return information like success or failure. Note that this shouldn't be used as a means to return actual user data.
+
+A second post:
+Output is used to share the user data from the SP to the calling program. One needs to use caution while using this as you don't want to have many output parameters. Also output parameters give only singleton values. And if there are too many, its best to use select statements to return the data. http://www.sqlteam.com/article/stored-procedures-returning-data
+
+
+
+CREATE vs CREATE OR REPLACE
+CREATE only works if the object with that same doesn't exist. If you try to create an object that already exists, the command will fail.
+
+CREATE OR REPLACE will create a new object, or replace an existing one, instead of throwing an error. That being said, this is an ORACLE construct.. ;)
+
+Sql Server way of doing something similar is to check if the object exists, and drop it first, if it does.
+
+https://stackoverflow.com/questions/163246/sql-server-equivalent-to-oracles-create-or-replace-view
+
+
+
+Debugging
+You can do debugging in SQL Server Management Studio, but it requires special permissions, which you guys do not have.
+
+I have never debugged one, as I'm not a fan of how it works (does not provide nearly enough information, when compared to Visual Studio, or other tools). Usually your SPs are straight forward enough to where printing out statements (with or without variable values) is usually more than enough to get me through what I needed to do.
+
+
+
+SELECT vs PRINT
+SELECT returns data via data set. This data is also available to other SPs, or an application that is expecting the value to be returned.
+
+PRINT merely prints a message (visible under Messages tab). This is helpful for debugging, but not visible or accessible to 
